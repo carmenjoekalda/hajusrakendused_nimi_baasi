@@ -2,6 +2,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "mysql": "^2.18.1",
+    "mysql2": "^3.9.3",
     "node": "^21.6.2"
   },
   "name": "nimi_baasi",
