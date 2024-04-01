@@ -6,6 +6,7 @@ const path = require('path');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 // Setup database connection
 const pool = mysql.createPool({
@@ -42,7 +43,7 @@ app.post('/signup', async (req, res) => {
 app.post('/signin', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const [user] = await pool.execute('SELECT FROM user WHERE username = ?', [username]);
+    const [user] = await pool.execute('SELECT * FROM user WHERE username = ?', [username]);
     
     if (user.length === 0 || user[0].password !== password) {
       return res.status(401).json({ message: 'Sign in failed'});
