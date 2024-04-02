@@ -3,8 +3,6 @@ const app = express()
 const mysql = require('mysql2/promise')
 const port = 3030
 const path = require('path');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
 const crypto = require('crypto')
 
 app.use(express.json());
@@ -31,7 +29,6 @@ app.get('/', (req, res) => {
 function md5(data){
   return crypto.createHash('md5').update(data).digest("hex");
 } 
-
 
 // sign up
 app.post('/signup', async (req, res) => {

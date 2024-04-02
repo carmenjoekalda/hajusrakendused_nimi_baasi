@@ -4,21 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css" />
     <title>Sign in</title>
 </head>
 
 <body>
-    <form method="POST" action="/signin">
-        <label for="name">Username:</label>
-        <input type="text" id="username" name="username" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-
-        <input type="submit" value="Sign in">
-    </form>
-
-    <a href="index.html" class="btn">Sign Up page</a>
+    <div class="container">
+        <div class="center">
+            <h1>Sign In</h1>
+            <form method="POST" action="/signin">
+                <div class="txt_field">
+                    <input type="text" id="username" name="username" required>
+                    <span></span>
+                    <label for="name">Username:</label>
+                </div>
+                <div class="txt_field">
+                    <input type="password" id="password" name="password" required>
+                    <span></span>
+                    <label for="password">Password:</label>
+                </div>
+                <input type="Submit" value="Sign in" name="submit">
+                <div class="link">
+                    Don't Have an Account yet? <a href="index.html" class="btn">Sign Up page</a>
+                </div>
+            </form>
 </body>
 
 </html>
