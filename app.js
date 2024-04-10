@@ -52,7 +52,7 @@ app.post('/signup', async (req, res) => {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <link rel="stylesheet" href="./style.css"/>
-          <title>Sign up</title>
+          <title>Sign Up</title>
       </head>
       <body>
           <div class="container">
@@ -98,7 +98,7 @@ app.post('/signin', async (req, res) => {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <link rel="stylesheet" href="./style.css" />
-          <title>Sign in</title>
+          <title>Sign In</title>
       </head>
       
       <body>
@@ -117,7 +117,7 @@ app.post('/signin', async (req, res) => {
                           <span></span>
                           <label for="password">Password:</label>
                       </div>
-                      <input type="Submit" value="Sign in" name="submit">
+                      <input type="Submit" value="Sign In" name="submit">
                       <div class="link">
                           Don't Have an Account yet? <a href="signup.html" class="btn">Sign Up here</a>
                       </div>
