@@ -8,7 +8,7 @@ function signUp(req, res) {
 
     pool.execute('INSERT INTO user (username, password) VALUES (?, ?)', [username, hashPassword])
         .then(() => {
-            res.redirect('/home.html');
+            res.redirect('/content.html');
         })
         .catch((error) => {
             let errorMessage = '';
@@ -100,7 +100,7 @@ function signIn(req, res) {
             </html>
           `);
             } else {
-                res.redirect('/home.html');
+                res.redirect('/content.html');
             }
         })
         .catch((error) => {

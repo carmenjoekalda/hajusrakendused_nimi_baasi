@@ -11,7 +11,7 @@ app.use(express.static('public'));
 
 // Route for serving the signup page
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // routes
