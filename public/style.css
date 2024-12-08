@@ -1,48 +1,77 @@
-
-body{
+body {
   margin: 0;
   padding: 0;
   font-family: Roboto;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background: linear-gradient(120deg, #007bff, #d0314c);
-  height: 100vh;
+  background-repeat: repeat;
+  background-size: fit;
+  background-color: #f7e7d2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23f5ddbe' fill-opacity='1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   overflow: hidden;
 }
 
-.center{
+.navbar {
+  background-color: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  color: #7c5c4c;
+}
+
+.nav-links li {
+  padding: 10px 20px;
+}
+
+.nav-links li:hover {
+  color: #5a3e2b;
+  transition: .3s;
+}
+
+.center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 29vw;
+  max-width: 400px;
   background: white;
   border-radius: 10px;
 }
 
-.center h1{
+.center h1 {
   text-align: center;
   padding: 0 0 20px 0;
-  border-bottom: 1px solid silver;
+  border-bottom: 1px solid #d1a98e;
+}
+
+.center h2 {
+  font-size: 1.2rem;
+  color: #7c5c4c;
+  margin-bottom: 20px;
 }
 
 .error-message {
-  color: red;
+  color: #b8473b;
   text-align: center;
 }
 
-.center form{
+.center form {
   padding: 0 40px;
   box-sizing: border-box;
 }
 
-form .txt_field{
+form .txt_field {
   position: relative;
-  border-bottom: 2px solid #adadad;
+  border-bottom: 2px solid #d1a98e;
   margin: 30px 0;
 }
 
-.txt_field input{
+.txt_field input {
   width: 100%;
   padding: 0 5px;
   height: 40px;
@@ -52,49 +81,45 @@ form .txt_field{
   outline: none;
 }
 
-.txt_field label{
+.txt_field label {
   position: absolute;
   top: 50%;
   left: 5px;
-  color: #adadad;
+  color: #b78f6f;
   transform: translateY(-50%);
   font-size: 16px;
   pointer-events: none;
 }
 
-.txt_field span::before{
+.txt_field span::before {
   content: '';
   position: absolute;
   top: 40px;
   left: 0;
   width: 0px;
   height: 2px;
-  background: #2691d9;
+  background: #b78f6f;
   transition: .5s;
 }
 
-.txt_field input:focus ~ label,
-.txt_field input:valid ~ label{
+.txt_field input:focus~label,
+.txt_field input:valid~label {
   top: -5px;
-  color: #2691d9;
 }
 
-.txt_field input:focus ~ span::before,
-.txt_field input:Valid ~ span::before{
+.txt_field input:focus~span::before,
+.txt_field input:Valid~span::before {
   width: 100%;
 }
 
-.pass{
-  margin: -5px 0 20px 5px;
-  color: #a6a6a6;
-  cursor: pointer;
+.btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
 }
 
-.pass:hover{
-  text-decoration: underline;
-}
-
-input[type="Submit"]{
+.btn {
   width: 100%;
   height: 50px;
   border: 1px solid;
@@ -102,32 +127,28 @@ input[type="Submit"]{
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-
+  background: #f7e7d2;
 }
 
-input[type="Submit"]:hover{
-  background: #2691d9;
-  color: #e9f4fb;
+.btn:hover {
+  background: #f0d5b8;
+  color: #5a3e2b;
   transition: .5s;
 }
 
-.link{
+.link {
   margin: 30px 0;
   text-align: center;
   font-size: 16px;
-  color: #666666;
+  color: #7c5c4c;
 }
 
-.link a{
-  color: #2691d9;
+.link a {
+  color: #b78f6f;
   text-decoration: none;
 }
 
-.link a:hover{
-  text-decoration: underline;
-}
-
-.HomeAbout{
-  width: 100vw;
-  height: 25vh;
+.link a:hover {
+  color: #5a3e2b;
+  transition: .3s;
 }

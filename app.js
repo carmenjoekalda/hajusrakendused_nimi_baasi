@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
-const routes = require('./routes/authRoutes');
+const authRoutes = require('./routes/authRoutes');
+const gameRoutes = require('./routes/gameRoutes');
 const port = 3030;
 const path = require('path');
 
@@ -15,7 +16,8 @@ app.get('/', (req, res) => {
 });
 
 // routes
-app.use('/', routes);
+app.use('/', authRoutes);
+app.use('/', gameRoutes);
 
 // start the server
 app.listen(port, () => {

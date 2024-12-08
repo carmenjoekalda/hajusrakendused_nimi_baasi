@@ -28,29 +28,27 @@ function signUp(req, res) {
               <title>Sign Up</title>
           </head>
           <body>
-              <div class="container">
-                  <div class="center">
+                <div class="container">
+                    <div class="center">
                       <h1>Sign Up</h1>
                       <p class="error-message">${errorMessage}</p>
-                      <form method="POST" action="/signup">
-                          <div class="txt_field">
-                              <input type="text" id="username" name="username" required>
-                              <span></span>
-                              <label for="name">Username:</label>
-                          </div>
-                          <div class="txt_field">
-                              <input type="password" id="password" name="password" required>
-                              <span></span>
-                              <label for="password">Password:</label>
-                          </div>
-  
-                          <input type="submit" value="Sign Up" name="submit">
-                          <div class="link">
-                              Have an Account? <a href="signin.html">Sign In Here</a>
-                          </div>
-                      </form>
-                  </div>
-              </div>
+                        <form method="POST" action="/signup">
+                            <div class="txt_field">
+                                <input type="text" id="username" name="username" required>
+                                <span></span>
+                                <label for="name">Username:</label>
+                            </div>
+                            <div class="txt_field">
+                                <input type="password" id="password" name="password" required>
+                                <span></span>
+                                <label for="password">Password:</label>
+                            </div>
+                                <input type="Submit" class="btn" value="Sign Up" name="submit">
+                            <div class="link"> Already Have an Account? <a href="signin.html">Sign In Here</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
           </body>
           </html>
         `);
@@ -90,11 +88,12 @@ function signIn(req, res) {
                                 <span></span>
                                 <label for="password">Password:</label>
                             </div>
-                            <input type="Submit" value="Sign In" name="submit">
+                            <input type="Submit" class="btn" value="Sign In" name="submit">
                             <div class="link">
-                                Don't Have an Account yet? <a href="signup.html" class="btn">Sign Up here</a>
+                                Don't Have an Account yet? <a href="signup.html">Sign Up here</a>
                             </div>
                         </form>
+                    </div>
                 </div>
             </body>
             </html>

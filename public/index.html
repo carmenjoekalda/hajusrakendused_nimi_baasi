@@ -5,18 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css" />
-    <title>Project</title>
+    <title>Hexatic!</title>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Filler text</h1>
-        <div class="button-container">
-            <a href="./content.html" class="button">Play</a>
-            <a href="/signin.html" class="button">Log In</a>
-            <a href="/signup.html" class="button">Sign Up</a>
+    <div id="center" class="center">
+        <h1>Hexatic!</h1>
+        <h2>Get 6 chances to guess the hex code</h2>
+        <div class="btn-container">
+            <div class="link">
+                <ul>
+                    <li><a href="#" class="btn" id="play">Play</a></li>
+                    <li><a href="/signin.html" class="btn">Log In</a></li>
+                    <li><a href="/signup.html" class="btn">Sign Up</a></li>
+                </ul>
+            </div>
         </div>
     </div>
+    <div id="game"></div>
+    <script>
+        // show game instead of the center div's options when the play button is clicked
+        document.getElementById('play').addEventListener('click', function (event) {
+            event.preventDefault();
+            fetch('/game-functionality')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('game').innerHTML = html;
+                });
+            // hide the center div
+            document.getElementById('center').style.display = 'none';
+        });
+    </script>
 </body>
 
 </html>
