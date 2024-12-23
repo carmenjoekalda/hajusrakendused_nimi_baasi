@@ -1,10 +1,6 @@
 function helloWorld() {
     return 'Hello World';
 }
-function game() {
+export function game() {
     return helloWorld();
 }
-
-module.exports = {
-    game
-};

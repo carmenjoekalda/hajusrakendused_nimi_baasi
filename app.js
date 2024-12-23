@@ -4,20 +4,22 @@ const authRoutes = require('./routes/authRoutes');
 const gameRoutes = require('./routes/gameRoutes');
 const port = 3030;
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use('/controllers', express.static(path.join(__dirname, 'controllers')));
+app.use(cookieParser());
 
-// Route for serving the signup page
+// Route for serving the index page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // routes
 app.use('/', authRoutes);
-app.use('/', gameRoutes);
 
 // start the server
 app.listen(port, () => {

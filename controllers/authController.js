@@ -7,52 +7,20 @@ function signUp(req, res) {
     const hashPassword = md5(password);
 
     pool.execute('INSERT INTO user (username, password) VALUES (?, ?)', [username, hashPassword])
-        .then(() => {
-            res.redirect('/content.html');
-        })
-        .catch((error) => {
-            let errorMessage = '';
-            if (error.code === 'ER_DUP_ENTRY') {
-                errorMessage = 'Username is already taken.';
-            } else {
-                errorMessage = 'An unexpected error occurred. Please try again.';
-            }
-
-            res.send(`
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <link rel="stylesheet" href="/style.css"/>
-              <title>Sign Up</title>
-          </head>
-          <body>
-                <div class="container">
-                    <div class="center">
-                      <h1>Sign Up</h1>
-                      <p class="error-message">${errorMessage}</p>
-                        <form method="POST" action="/signup">
-                            <div class="txt_field">
-                                <input type="text" id="username" name="username" required>
-                                <span></span>
-                                <label for="name">Username:</label>
-                            </div>
-                            <div class="txt_field">
-                                <input type="password" id="password" name="password" required>
-                                <span></span>
-                                <label for="password">Password:</label>
-                            </div>
-                                <input type="Submit" class="btn" value="Sign Up" name="submit">
-                            <div class="link"> Already Have an Account? <a href="signin.html">Sign In Here</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-          </body>
-          </html>
-        `);
-        });
+    .then(() => {
+        res.cookie('loggedin', 'true', { path: '/' });
+        res.redirect('/index.html');
+    })
+    .catch((error) => {
+        let errorMessage = '';
+        if (error.code === 'ER_DUP_ENTRY') {
+            errorMessage = 'Username is already taken.';
+        } else {
+            errorMessage = 'An unexpected error occurred. Please try again.';
+        }
+        res.cookie('error', errorMessage);
+        res.redirect('/signup.html');
+    });
 }
 
 // sign in
@@ -63,48 +31,17 @@ function signIn(req, res) {
         .then(([user]) => {
             if (user.length === 0 || md5(password) !== user[0].password) {
                 const errorMessage = 'Invalid username or password.';
-                res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <link rel="stylesheet" href="./style.css" />
-                <title>Sign In</title>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="center">
-                        <h1>Sign In</h1>
-                        <p class="error-message">${errorMessage}</p>
-                        <form method="POST" action="/signin">
-                            <div class="txt_field">
-                                <input type="text" id="username" name="username" required>
-                                <span></span>
-                                <label for="name">Username:</label>
-                            </div>
-                            <div class="txt_field">
-                                <input type="password" id="password" name="password" required>
-                                <span></span>
-                                <label for="password">Password:</label>
-                            </div>
-                            <input type="Submit" class="btn" value="Sign In" name="submit">
-                            <div class="link">
-                                Don't Have an Account yet? <a href="signup.html">Sign Up here</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </body>
-            </html>
-          `);
+                res.cookie('error', errorMessage);
+                res.redirect('/signin.html');
             } else {
-                res.redirect('/content.html');
+                res.cookie('loggedin', 'true', { path: '/' });
+                res.redirect('/index.html');
             }
         })
         .catch((error) => {
-            console.error(error.message);
-            res.status(500).send('Server error');
+            const errorMessage = 'An unexpected error occurred. Please try again.';
+            res.cookie('error', errorMessage);
+            res.redirect('/signin.html');
         });
 }
 
