@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const authRoutes = require('./routes/authRoutes');
-const gameRoutes = require('./routes/gameRoutes');
 const port = 3030;
 const path = require('path');
 const cookieParser = require('cookie-parser');

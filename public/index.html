@@ -5,32 +5,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css" />
-    <title>Hexatic!</title>
+    <title>Hextatic!</title>
 </head>
 
 <body>
     <!--play / sign in / sign up-->
     <div id="center" class="center">
-        <h1>Hexatic!</h1>
+        <h1>Hextatic!</h1>
         <h2>Get 6 chances to guess the hex code</h2>
         <div class="btn-container">
-            <div class="link">
-                <ul>
-                    <li><a href="#" class="btn" id="play">Play</a></li>
-                    <li><a href="/signin.html" class="btn">Log In</a></li>
-                    <li><a href="/signup.html" class="btn">Sign Up</a></li>
-                </ul>
-            </div>
+            <a href="#" class="btn" id="play">Play</a>
+            <a href="/signin.html" class="btn">Log In</a>
+            <a href="/signup.html" class="btn">Sign Up</a>
         </div>
     </div>
 
     <!--navbar-->
-    <div id="navbar" style="display:none;">
-        <ul class="nav-links">
-            <li>tutorial</li>
-            <li>stats</li>
-            <li>settings</li>
-            <li>profile</li>
+    <div id="navbar" class="navbar" style="display:none;">
+        <ul class="nav-links" id="nav-links">
+            <li><a href="#">Tutorial</a></li>
+            <li><a href="#">Stats</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="#" id="logout">Log Out</a></li>
         </ul>
     </div>
 
@@ -39,11 +36,11 @@
 
     <script type="module">
         // show game & navbar
-        import { game } from '../controllers/gameControllers.js'; 
-        
+        import { game } from '../controllers/gameControllers.js';
+
         function showGameAndNavbar() {
             document.getElementById('center').style.display = 'none';
-            document.getElementById('navbar').style.display = 'block';
+            document.getElementById('navbar').style.display = 'flex';
             document.getElementById('game').style.display = 'block';
             document.getElementById('game').innerHTML = game();
         }
@@ -53,7 +50,7 @@
             event.preventDefault();
             showGameAndNavbar();
         });
-        
+
         // show game & navbar when user is logged in
         function getCookie(name) {
             const value = "; " + document.cookie;
@@ -62,9 +59,15 @@
         }
         const loggedIn = getCookie('loggedin');
         if (loggedIn === 'true') {
-            console.log('User is logged in, showing game and navbar');
             showGameAndNavbar();
         }
+
+        // log out
+        document.getElementById('logout').addEventListener('click', function (event) {
+            event.preventDefault();
+            document.cookie = 'loggedin=; Max-Age=0; path=/';
+            location.reload();
+        });
     </script>
 
 </body>
