@@ -190,3 +190,10 @@ form .txt_field {
   background-color: #f5ddbe;
   transition: .3s;
 }
+
+.color-square {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  margin: 10px;
+}

@@ -38,11 +38,57 @@
         // show game & navbar
         import { game } from '../controllers/gameControllers.js';
 
+        function isValidHex(hex) {
+            return /^[0-9A-Fa-f]{6}$/.test(hex);
+        }
+
         function showGameAndNavbar() {
             document.getElementById('center').style.display = 'none';
             document.getElementById('navbar').style.display = 'flex';
             document.getElementById('game').style.display = 'block';
-            document.getElementById('game').innerHTML = game();
+            
+            const gameData = game();
+            document.getElementById('game').innerHTML = `
+                <p>Hex Code: #${gameData.hex}</p>
+                <div class="color-square" style="background-color: #${gameData.hex};"></div>
+                <div id="submittedColor" class="color-square" style="display: none;"></div>
+                <input type="text" id="guess" placeholder="#" />
+                <button id="submitGuess">Submit</button>
+                <p id="error" class="error-message" style="display: none;">Invalid hex code. Please enter a valid 6-character hex code.</p>
+                <div id="submissions"></div>
+            `;
+
+            let submissionCount = 0;
+            const maxSubmissions = 6;
+
+            document.getElementById('submitGuess').addEventListener('click', function () {
+                const guessInput = document.getElementById('guess');
+                const errorElement = document.getElementById('error');
+                const submittedColor = document.getElementById('submittedColor');
+                const submissions = document.getElementById('submissions');
+                let guessValue = guessInput.value.trim();
+                if (guessValue.startsWith('#')) {
+                    guessValue = guessValue.slice(1);
+                }
+
+                if (isValidHex(guessValue) && guessValue.length === 6) {
+                    errorElement.style.display = 'none';
+                    submittedColor.style.display = 'inline-block';
+                    submittedColor.style.backgroundColor = `#${guessValue}`;
+
+                    const newSubmission = document.createElement('div');
+                    newSubmission.innerHTML = `
+                        <p>Submitted Hex Code: #${guessValue}</p>
+                    `;
+                    submissions.appendChild(newSubmission);
+                    submissionCount++;
+                    if (submissionCount >= maxSubmissions) {
+                        document.getElementById('submitGuess').disabled = true;
+                    }
+                } else {
+                    errorElement.style.display = 'block';
+                }
+            });
         }
 
         // show game & navbar when 'play' is clicked

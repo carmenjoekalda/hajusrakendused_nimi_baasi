@@ -1,6 +1,9 @@
-function helloWorld() {
-    return 'Hello World';
-}
+function generateHex() {
+    return Math.floor(Math.random()*16777215).toString(16);
+} 
+
 export function game() {
-    return helloWorld();
+    return {
+        hex: generateHex()
+    };
 }
