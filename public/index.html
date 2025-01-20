@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Hextatic!</title>
 </head>
 
@@ -52,14 +53,16 @@
                 <p>Hex Code: #${gameData.hex}</p>
                 <div class="color-square" style="background-color: #${gameData.hex};"></div>
                 <div id="submittedColor" class="color-square" style="display: none;"></div>
-                <input type="text" id="guess" placeholder="#" />
-                <button id="submitGuess">Submit</button>
+                <button id="refreshGuess"><i class="material-icons">refresh</i></button>
+                <div class="input-container">
+                    <input type="text" id="guess"/>
+                </div>
+                <button id="submitGuess"><i class="material-icons">check</i></button>
                 <p id="error" class="error-message" style="display: none;">Invalid hex code. Please enter a valid 6-character hex code.</p>
                 <div id="submissions"></div>
             `;
 
             let submissionCount = 0;
-            const maxSubmissions = 6;
 
             document.getElementById('submitGuess').addEventListener('click', function () {
                 const guessInput = document.getElementById('guess');
@@ -78,16 +81,40 @@
 
                     const newSubmission = document.createElement('div');
                     newSubmission.innerHTML = `
-                        <p>Submitted Hex Code: #${guessValue}</p>
+                        <div>
+                            ${guessValue.split('').map((char, index) => {
+                                const generatedChar = gameData.hex[index];
+                                const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
+                                let arrows = '';
+                                if (charDiff >= 3) {
+                                    arrows = '⇈';
+                                } else if (charDiff <= -3) {
+                                    arrows = '⇊';
+                                } else if (charDiff > 0) {
+                                    arrows = '↑';
+                                } else if (charDiff < 0) {
+                                    arrows = '↓';
+                                }
+                                else if (charDiff === 0) {
+                                    arrows = '✓';
+                                }
+                                return `<div class="char-box" style="border-color: #${guessValue};"><span>${char}</span><span class="arrow">${arrows}</span></div>`;
+                            }).join('')}
+                        </div>
                     `;
-                    submissions.appendChild(newSubmission);
+                    submissions.insertBefore(newSubmission, submissions.firstChild);
                     submissionCount++;
-                    if (submissionCount >= maxSubmissions) {
+                    if (submissionCount >= 6) {
                         document.getElementById('submitGuess').disabled = true;
                     }
                 } else {
                     errorElement.style.display = 'block';
                 }
+            });
+
+            // refresh button
+            document.getElementById('refreshGuess').addEventListener('click', function () {
+                document.getElementById('guess').value = '';
             });
         }
 

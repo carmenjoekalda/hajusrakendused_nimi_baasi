@@ -189,11 +189,36 @@ form .txt_field {
   color: #5a3e2b;
   background-color: #f5ddbe;
   transition: .3s;
-}
+} 
 
 .color-square {
   width: 100px;
   height: 100px;
   display: inline-block;
   margin: 10px;
+}
+
+.char-box {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 1px solid;
+  text-align: center;
+  margin: 2px;
+}
+
+.input-container {
+  position: relative;
+  display: inline-block;
+}
+.input-container::before {
+  content: '#';
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #000;
+}
+.input-container input {
+  padding-left: 15px;
 }
