@@ -41,7 +41,7 @@
             document.getElementById('center').style.display = 'none';
             document.getElementById('navbar').style.display = 'flex';
             document.getElementById('game').style.display = 'block';
-            
+
             // Display the fetched hex code
             document.getElementById('game').innerHTML = `
                 <p>Hex Code: #${hex}</p>
@@ -55,9 +55,9 @@
                 <p id="error" class="error-message" style="display: none;">Invalid hex code. Please enter a valid 6-character hex code.</p>
                 <div id="submissions"></div>
             `;
-    
+
             let submissionCount = 0;
-    
+
             document.getElementById('submitGuess').addEventListener('click', function () {
                 const guessInput = document.getElementById('guess');
                 const errorElement = document.getElementById('error');
@@ -66,52 +66,55 @@
                 let guessValue = guessInput.value.trim();
                 if (guessValue.startsWith('#')) {
                     guessValue = guessValue.slice(1);
-                }
-    
+                };
+
                 if (isValidHex(guessValue) && guessValue.length === 6) {
                     errorElement.style.display = 'none';
                     submittedColor.style.display = 'inline-block';
                     submittedColor.style.backgroundColor = `#${guessValue}`;
-    
+
                     const newSubmission = document.createElement('div');
-                    newSubmission.innerHTML = `
-                        <div>
-                            ${guessValue.split('').map((char, index) => {
-                                const generatedChar = hex[index];
-                                const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
-                                let arrows = '';
-                                if (charDiff >= 3) {
-                                    arrows = '⇈';
-                                } else if (charDiff <= -3) {
-                                    arrows = '⇊';
-                                } else if (charDiff > 0) {
-                                    arrows = '↑';
-                                } else if (charDiff < 0) {
-                                    arrows = '↓';
-                                }
-                                else if (charDiff === 0) {
-                                    arrows = '✓';
-                                }
-                                return `<div class="char-box" style="border-color: #${guessValue};"><span>${char}</span><span class="arrow">${arrows}</span></div>`;
-                            }).join('')}
-                        </div>
-                    `;
+                    newSubmission.innerHTML = `<div>
+                        ${guessValue.split('').map((char, index) => {
+                        const generatedChar = hex[index];
+                        const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16); // Hexadecimal comparison
+                        let arrows = '';
+                        if (charDiff === 0) {
+                            arrows = '✓';
+                        } else if (charDiff <= -3) {
+                            arrows = '⇈';
+                        } else if (charDiff <= -1) {
+                            arrows = '↑';
+                        } else if (charDiff >= 3) {
+                            arrows = '⇊';
+                        } else if (charDiff >= 1) {
+                            arrows = '↓';
+                        }
+                        return `<div class="char-box" style="border-color: #${guessValue};">
+                            <span>${char.toUpperCase()}</span>
+                            <span class="arrow">${arrows}</span>
+                            </div>`;
+                    }).join('')}
+                    </div>`;
+
                     submissions.insertBefore(newSubmission, submissions.firstChild);
                     submissionCount++;
+
                     if (submissionCount >= 6) {
                         document.getElementById('submitGuess').disabled = true;
                     }
+
                 } else {
                     errorElement.style.display = 'block';
                 }
             });
-    
+
             // Refresh button
             document.getElementById('refreshGuess').addEventListener('click', function () {
                 document.getElementById('guess').value = '';
             });
         }
-    
+
         // Fetch today's hex code from the backend
         function fetchTodaysHexCode() {
             fetch('/daily-hexcode')
@@ -127,25 +130,30 @@
                     console.error('Error fetching hex code:', error);
                 });
         }
-    
+
+        // Validate hex code
+        function isValidHex(hex) {
+            return /^[0-9A-Fa-f]{6}$/.test(hex);
+        }
+
         // Show game & navbar when 'play' is clicked
         document.getElementById('play').addEventListener('click', function (event) {
             event.preventDefault();
             fetchTodaysHexCode();
         });
-    
+
         // Show game & navbar when the user is logged in
         function getCookie(name) {
             const value = "; " + document.cookie;
             const parts = value.split("; " + name + "=");
             if (parts.length == 2) return parts.pop().split(";").shift();
         }
-    
+
         const loggedIn = getCookie('loggedin');
         if (loggedIn === 'true') {
             fetchTodaysHexCode();
         }
-    
+
         // Log out
         document.getElementById('logout').addEventListener('click', function (event) {
             event.preventDefault();
