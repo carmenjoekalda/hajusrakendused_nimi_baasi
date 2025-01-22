@@ -36,22 +36,16 @@
     <div id="game" style="display: none;"></div>
 
     <script type="module">
-        // show game & navbar
-        import { game } from '../controllers/gameControllers.js';
-
-        function isValidHex(hex) {
-            return /^[0-9A-Fa-f]{6}$/.test(hex);
-        }
-
-        function showGameAndNavbar() {
+        // Show game & navbar
+        function showGameAndNavbar(hex) {
             document.getElementById('center').style.display = 'none';
             document.getElementById('navbar').style.display = 'flex';
             document.getElementById('game').style.display = 'block';
             
-            const gameData = game();
+            // Display the fetched hex code
             document.getElementById('game').innerHTML = `
-                <p>Hex Code: #${gameData.hex}</p>
-                <div class="color-square" style="background-color: #${gameData.hex};"></div>
+                <p>Hex Code: #${hex}</p>
+                <div class="color-square" style="background-color: #${hex};"></div>
                 <div id="submittedColor" class="color-square" style="display: none;"></div>
                 <button id="refreshGuess"><i class="material-icons">refresh</i></button>
                 <div class="input-container">
@@ -61,9 +55,9 @@
                 <p id="error" class="error-message" style="display: none;">Invalid hex code. Please enter a valid 6-character hex code.</p>
                 <div id="submissions"></div>
             `;
-
+    
             let submissionCount = 0;
-
+    
             document.getElementById('submitGuess').addEventListener('click', function () {
                 const guessInput = document.getElementById('guess');
                 const errorElement = document.getElementById('error');
@@ -73,17 +67,17 @@
                 if (guessValue.startsWith('#')) {
                     guessValue = guessValue.slice(1);
                 }
-
+    
                 if (isValidHex(guessValue) && guessValue.length === 6) {
                     errorElement.style.display = 'none';
                     submittedColor.style.display = 'inline-block';
                     submittedColor.style.backgroundColor = `#${guessValue}`;
-
+    
                     const newSubmission = document.createElement('div');
                     newSubmission.innerHTML = `
                         <div>
                             ${guessValue.split('').map((char, index) => {
-                                const generatedChar = gameData.hex[index];
+                                const generatedChar = hex[index];
                                 const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
                                 let arrows = '';
                                 if (charDiff >= 3) {
@@ -111,31 +105,48 @@
                     errorElement.style.display = 'block';
                 }
             });
-
-            // refresh button
+    
+            // Refresh button
             document.getElementById('refreshGuess').addEventListener('click', function () {
                 document.getElementById('guess').value = '';
             });
         }
-
-        // show game & navbar when 'play' is clicked
+    
+        // Fetch today's hex code from the backend
+        function fetchTodaysHexCode() {
+            fetch('/daily-hexcode')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.hex) {
+                        showGameAndNavbar(data.hex);
+                    } else {
+                        console.error('Hex code for today not found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching hex code:', error);
+                });
+        }
+    
+        // Show game & navbar when 'play' is clicked
         document.getElementById('play').addEventListener('click', function (event) {
             event.preventDefault();
-            showGameAndNavbar();
+            fetchTodaysHexCode();
         });
-
-        // show game & navbar when user is logged in
+    
+        // Show game & navbar when the user is logged in
         function getCookie(name) {
             const value = "; " + document.cookie;
             const parts = value.split("; " + name + "=");
             if (parts.length == 2) return parts.pop().split(";").shift();
         }
+    
         const loggedIn = getCookie('loggedin');
         if (loggedIn === 'true') {
-            showGameAndNavbar();
+            fetchTodaysHexCode();
         }
-
-        // log out
+    
+        // Log out
         document.getElementById('logout').addEventListener('click', function (event) {
             event.preventDefault();
             document.cookie = 'loggedin=; Max-Age=0; path=/';
