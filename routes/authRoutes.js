@@ -9,5 +9,6 @@ router.post('/signIn', authController.signIn);
 
 router.get('/daily-hexcode', gameController.getTodaysHexCode)
 router.post('/save-guess', gameController.saveGuess);
+router.get('/get-guesses', gameController.getGuesses);
 
 module.exports = router;

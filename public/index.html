@@ -60,6 +60,28 @@
             let gameFinished = false;
             const guesses = [];
 
+            // Fetch previous guesses if logged in
+            const loggedIn = getCookie('loggedin');
+            if (loggedIn === 'true') {
+                fetch('/get-guesses')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Fetched data from database:", data);
+                        if (data.guesses) {
+                            data.guesses.forEach((guess, index) => {
+                                if (guess && !guesses.includes(guess)) { // Only add if not already in the array
+                                    displayGuess(guess, index + 1);
+                                    guesses.push(guess);
+                                    submissionCount++;
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching previous guesses:', error);
+                    });
+            }
+
             document.getElementById('submitGuess').addEventListener('click', function () {
                 const guessInput = document.getElementById('guess');
                 const errorElement = document.getElementById('error');
@@ -75,31 +97,7 @@
                     submittedColor.style.display = 'inline-block';
                     submittedColor.style.backgroundColor = `#${guessValue}`;
 
-                    const newSubmission = document.createElement('div');
-                    newSubmission.innerHTML = `<div>
-                        ${guessValue.split('').map((char, index) => {
-                            const generatedChar = hex[index];
-                            const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
-                            let arrows = '';
-                            if (charDiff === 0) {
-                                arrows = '✓';
-                            } else if (charDiff <= -3) {
-                                arrows = '⇈';
-                            } else if (charDiff <= -1) {
-                                arrows = '↑';
-                            } else if (charDiff >= 3) {
-                                arrows = '⇊';
-                            } else if (charDiff >= 1) {
-                                arrows = '↓';
-                            }
-                            return `<div class="char-box" style="border-color: #${guessValue};">
-                                <span>${char.toUpperCase()}</span>
-                                <span class="arrow">${arrows}</span>
-                                </div>`;
-                        }).join('')}
-                    </div>`;
-
-                    submissions.insertBefore(newSubmission, submissions.firstChild);
+                    displayGuess(guessValue, submissionCount + 1);
                     submissionCount++;
 
                     // Store the guess
@@ -124,13 +122,13 @@
                                 guessNumber: submissionCount
                             }),
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Guess sent to the backend:', data);
-                        })
-                        .catch(error => {
-                            console.error('Error saving guess:', error);
-                        });
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Guess sent to the backend:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error saving guess:', error);
+                            });
                     } else {
                         // Store guesses in localStorage if not logged in
                         localStorage.setItem('guesses', JSON.stringify(guesses));
@@ -154,6 +152,34 @@
                 document.getElementById('guess').value = '';
                 submittedColor.style.display = 'none';
             });
+
+            function displayGuess(guess, guessNumber) {
+                const submissions = document.getElementById('submissions');
+                const newSubmission = document.createElement('div');
+                newSubmission.innerHTML = `<div>
+                    ${guess.split('').map((char, index) => {
+                    const generatedChar = hex[index];
+                    const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
+                    let arrows = '';
+                    if (charDiff === 0) {
+                        arrows = '✓';
+                    } else if (charDiff <= -3) {
+                        arrows = '⇈';
+                    } else if (charDiff <= -1) {
+                        arrows = '↑';
+                    } else if (charDiff >= 3) {
+                        arrows = '⇊';
+                    } else if (charDiff >= 1) {
+                        arrows = '↓';
+                    }
+                    return `<div class="char-box" style="border-color: #${guess};">
+                            <span>${char.toUpperCase()}</span>
+                            <span class="arrow">${arrows}</span>
+                            </div>`;
+                }).join('')}
+                </div>`;
+                submissions.insertBefore(newSubmission, submissions.firstChild);
+            }
         }
 
         // Fetch today's hex code from the backend
@@ -190,11 +216,6 @@
             if (parts.length == 2) return parts.pop().split(";").shift();
         }
 
-        const loggedIn = getCookie('loggedin');
-        if (loggedIn === 'true') {
-            fetchTodaysHexCode();
-        }
-
         // Log out
         document.getElementById('logout').addEventListener('click', function (event) {
             event.preventDefault();
@@ -207,6 +228,7 @@
             fetchTodaysHexCode();
         }
     </script>
+
 
 </body>
 

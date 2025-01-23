@@ -5,7 +5,7 @@ function generateHex() {
     return Math.floor(Math.random()*16777215).toString(16);
 } 
 
-// insert the deaily hexcode to the database
+// insert the daily hexcode to the database
 function insertTodaysHexCode() {
     const today = new Date().toISOString().split('T')[0];
     const hexCode = generateHex();
@@ -18,12 +18,10 @@ function insertTodaysHexCode() {
         });
 }
 
-
-// insertTodaysHxCode() every midnight
+// insertTodaysHexCode() every midnight
 cron.schedule('0 0 * * *', insertTodaysHexCode); 
 
-
-// fetch todays daily hex code
+// fetch today's daily hex code
 function getTodaysHexCode(req, res) {
     const today = new Date().toISOString().split('T')[0];
 
@@ -78,7 +76,45 @@ function saveGuess(req, res) {
         });
 }
 
+function getGuesses(req, res) {
+    const username = req.cookies.username;
+
+    pool.execute('SELECT id FROM user WHERE username = ?', [username])
+        .then(([user]) => {
+            if (user.length > 0) {
+                const userId = user[0].id;
+                pool.execute('SELECT * FROM user_guesses WHERE user_id = ?', [userId])
+                    .then(([guesses]) => {
+                        if (guesses.length > 0) {
+                            const userGuesses = [
+                                guesses[0].guess_1,
+                                guesses[0].guess_2,
+                                guesses[0].guess_3,
+                                guesses[0].guess_4,
+                                guesses[0].guess_5,
+                                guesses[0].guess_6
+                            ].filter(guess => guess !== null); // Filter out null values
+                            res.json({ guesses: userGuesses });
+                        } else {
+                            res.json({ guesses: [] });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching guesses:', error);
+                        res.status(500).json({ error: 'Error fetching guesses' });
+                    });
+            } else {
+                res.status(404).json({ error: 'User not found' });
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching user ID:', error);
+            res.status(500).json({ error: 'Error fetching user ID' });
+        });
+}
+
 module.exports = {
     getTodaysHexCode,
     saveGuess,
+    getGuesses,
 };
