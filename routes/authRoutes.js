@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { signUp, signIn } = require('../controllers/authController');
-const { getTodaysHexCode } = require('../controllers/gameControllers');
+const authController = require('../controllers/authController');
+const gameController = require('../controllers/gameControllers');
 
 router.post('/', )
-router.post('/signup', signUp);
-router.post('/signIn', signIn);
+router.post('/signup', authController.signUp);
+router.post('/signIn', authController.signIn);
 
-router.get('/daily-hexcode', getTodaysHexCode)
+router.get('/daily-hexcode', gameController.getTodaysHexCode)
+router.post('/save-guess', gameController.saveGuess);
 
 module.exports = router;

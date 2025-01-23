@@ -58,6 +58,7 @@
 
             let submissionCount = 0;
             let gameFinished = false;
+            const guesses = [];
 
             document.getElementById('submitGuess').addEventListener('click', function () {
                 const guessInput = document.getElementById('guess');
@@ -67,7 +68,7 @@
                 let guessValue = guessInput.value.trim();
                 if (guessValue.startsWith('#')) {
                     guessValue = guessValue.slice(1);
-                };
+                }
 
                 if (isValidHex(guessValue) && guessValue.length === 6) {
                     errorElement.style.display = 'none';
@@ -77,41 +78,69 @@
                     const newSubmission = document.createElement('div');
                     newSubmission.innerHTML = `<div>
                         ${guessValue.split('').map((char, index) => {
-                        const generatedChar = hex[index];
-                        const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
-                        let arrows = '';
-                        if (charDiff === 0) {
-                            arrows = '✓';
-                        } else if (charDiff <= -3) {
-                            arrows = '⇈';
-                        } else if (charDiff <= -1) {
-                            arrows = '↑';
-                        } else if (charDiff >= 3) {
-                            arrows = '⇊';
-                        } else if (charDiff >= 1) {
-                            arrows = '↓';
-                        }
-                        return `<div class="char-box" style="border-color: #${guessValue};">
-                            <span>${char.toUpperCase()}</span>
-                            <span class="arrow">${arrows}</span>
-                            </div>`;
-                    }).join('')}
+                            const generatedChar = hex[index];
+                            const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
+                            let arrows = '';
+                            if (charDiff === 0) {
+                                arrows = '✓';
+                            } else if (charDiff <= -3) {
+                                arrows = '⇈';
+                            } else if (charDiff <= -1) {
+                                arrows = '↑';
+                            } else if (charDiff >= 3) {
+                                arrows = '⇊';
+                            } else if (charDiff >= 1) {
+                                arrows = '↓';
+                            }
+                            return `<div class="char-box" style="border-color: #${guessValue};">
+                                <span>${char.toUpperCase()}</span>
+                                <span class="arrow">${arrows}</span>
+                                </div>`;
+                        }).join('')}
                     </div>`;
 
                     submissions.insertBefore(newSubmission, submissions.firstChild);
                     submissionCount++;
 
+                    // Store the guess
+                    guesses.push(guessValue);
+
                     // Check if the guess is correct
                     if (guessValue.toLowerCase() === hex.toLowerCase()) {
-                        // later
                         gameFinished = true;
+                        alert('Congratulations! You guessed the hex code.');
+                    }
+
+                    // Store guesses depending on login status
+                    if (loggedIn === 'true') {
+                        // Send guesses to the server if logged in
+                        fetch('/save-guess', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                guess: guessValue,
+                                guessNumber: submissionCount
+                            }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Guess sent to the backend:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error saving guess:', error);
+                        });
+                    } else {
+                        // Store guesses in localStorage if not logged in
+                        localStorage.setItem('guesses', JSON.stringify(guesses));
                     }
 
                     // Check if all 6 guesses have been used up
                     if (submissionCount >= 6 || gameFinished) {
                         document.getElementById('submitGuess').disabled = true;
                         if (!gameFinished) {
-                            // later
+                            alert(`Game over! The correct hex code was #${hex}.`);
                         }
                     }
 
@@ -123,6 +152,7 @@
             // Refresh button
             document.getElementById('refreshGuess').addEventListener('click', function () {
                 document.getElementById('guess').value = '';
+                submittedColor.style.display = 'none';
             });
         }
 
@@ -171,6 +201,11 @@
             document.cookie = 'loggedin=; Max-Age=0; path=/';
             location.reload();
         });
+
+        // Check if user is logged in on page load
+        if (getCookie('loggedin') === 'true') {
+            fetchTodaysHexCode();
+        }
     </script>
 
 </body>

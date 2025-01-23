@@ -9,6 +9,9 @@ function signUp(req, res) {
     pool.execute('INSERT INTO user (username, password) VALUES (?, ?)', [username, hashPassword])
     .then(() => {
         res.cookie('loggedin', 'true', { path: '/' });
+        res.cookie('username', username, { path: '/' });
+        console.log(`User signed up and logged in: ${username}`);
+        fetchUserDetails(username);
         res.redirect('/index.html');
     })
     .catch((error) => {
@@ -35,6 +38,9 @@ function signIn(req, res) {
                 res.redirect('/signin.html');
             } else {
                 res.cookie('loggedin', 'true', { path: '/' });
+                res.cookie('username', username, { path: '/' });
+                console.log(`User signed in: ${username}`);
+                fetchUserDetails(username);
                 res.redirect('/index.html');
             }
         })
@@ -42,6 +48,21 @@ function signIn(req, res) {
             const errorMessage = 'An unexpected error occurred. Please try again.';
             res.cookie('error', errorMessage);
             res.redirect('/signin.html');
+        });
+}
+
+// Fetch user details
+function fetchUserDetails(username) {
+    pool.execute('SELECT * FROM user WHERE username = ?', [username])
+        .then(([user]) => {
+            if (user.length > 0) {
+                console.log('User details:', user[0]);
+            } else {
+                console.log('User not found');
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching user details:', error);
         });
 }
 

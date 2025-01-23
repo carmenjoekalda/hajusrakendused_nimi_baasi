@@ -49,6 +49,36 @@ function getTodaysHexCode(req, res) {
         });
 }
 
+function saveGuess(req, res) {
+    const { guess, guessNumber } = req.body;
+    const username = req.cookies.username;
+
+    pool.execute('SELECT id FROM user WHERE username = ?', [username])
+        .then(([user]) => {
+            if (user.length > 0) {
+                const userId = user[0].id;
+                const guessField = `guess_${guessNumber}`;
+                const query = `UPDATE user_guesses SET ${guessField} = ? WHERE user_id = ?`;
+
+                pool.execute(query, [guess, userId])
+                    .then(() => {
+                        res.json({ message: 'Guess saved successfully' });
+                    })
+                    .catch((error) => {
+                        console.error('Error saving guess:', error);
+                        res.status(500).json({ error: 'Error saving guess' });
+                    });
+            } else {
+                res.status(404).json({ error: 'User not found' });
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching user ID:', error);
+            res.status(500).json({ error: 'Error fetching user ID' });
+        });
+}
+
 module.exports = {
     getTodaysHexCode,
+    saveGuess,
 };
