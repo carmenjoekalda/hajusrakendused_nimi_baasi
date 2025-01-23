@@ -57,6 +57,7 @@
             `;
 
             let submissionCount = 0;
+            let gameFinished = false;
 
             document.getElementById('submitGuess').addEventListener('click', function () {
                 const guessInput = document.getElementById('guess');
@@ -77,7 +78,7 @@
                     newSubmission.innerHTML = `<div>
                         ${guessValue.split('').map((char, index) => {
                         const generatedChar = hex[index];
-                        const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16); // Hexadecimal comparison
+                        const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
                         let arrows = '';
                         if (charDiff === 0) {
                             arrows = '✓';
@@ -100,8 +101,18 @@
                     submissions.insertBefore(newSubmission, submissions.firstChild);
                     submissionCount++;
 
-                    if (submissionCount >= 6) {
+                    // Check if the guess is correct
+                    if (guessValue.toLowerCase() === hex.toLowerCase()) {
+                        // later
+                        gameFinished = true;
+                    }
+
+                    // Check if all 6 guesses have been used up
+                    if (submissionCount >= 6 || gameFinished) {
                         document.getElementById('submitGuess').disabled = true;
+                        if (!gameFinished) {
+                            // later
+                        }
                     }
 
                 } else {
