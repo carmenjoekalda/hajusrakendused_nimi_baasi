@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <!--play / sign in / sign up-->
+    <!-- Play / Sign In / Sign Up -->
     <div id="center" class="center">
         <h1>Hextatic!</h1>
         <h2>Get 6 chances to guess the hex code</h2>
@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <!--navbar-->
+    <!-- Navbar -->
     <div id="navbar" class="navbar" style="display:none;">
         <ul class="nav-links" id="nav-links">
             <li><a href="#">Tutorial</a></li>
@@ -32,17 +32,25 @@
         </ul>
     </div>
 
-    <!--game-->
+    <!-- Game -->
     <div id="game" style="display: none;"></div>
 
     <script type="module">
+        let gameStarted = false;
+        let hexCode = '';
+        let submissionCount = 0;
+        let gameFinished = false;
+        let guesses = [];
+        let gameId = '';
+
         // Show game & navbar
         function showGameAndNavbar(hex) {
             document.getElementById('center').style.display = 'none';
             document.getElementById('navbar').style.display = 'flex';
             document.getElementById('game').style.display = 'block';
 
-            // Display the fetched hex code
+            hexCode = hex;  // Store the fetched hex code
+
             document.getElementById('game').innerHTML = `
                 <p>Hex Code: #${hex}</p>
                 <div class="color-square" style="background-color: #${hex};"></div>
@@ -56,9 +64,10 @@
                 <div id="submissions"></div>
             `;
 
-            let submissionCount = 0;
-            let gameFinished = false;
-            const guesses = [];
+            // Reset values when starting a new game
+            submissionCount = 0;
+            gameFinished = false;
+            guesses = [];
 
             // Fetch previous guesses if logged in
             const loggedIn = getCookie('loggedin');
@@ -82,6 +91,7 @@
                     });
             }
 
+            // Submit guess
             document.getElementById('submitGuess').addEventListener('click', function () {
                 const guessInput = document.getElementById('guess');
                 const errorElement = document.getElementById('error');
@@ -104,9 +114,28 @@
                     guesses.push(guessValue);
 
                     // Check if the guess is correct
-                    if (guessValue.toLowerCase() === hex.toLowerCase()) {
+                    if (guessValue.toLowerCase() === hexCode.toLowerCase()) {
                         gameFinished = true;
-                        alert('Congratulations! You guessed the hex code.');
+                        // Send result to backend if logged in
+                        if (gameStarted && loggedIn === 'true') {
+                            fetch('/end-game', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    gameId: gameId,
+                                    result: 'win'
+                                }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Game ended with win:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error sending game result:', error);
+                            });
+                        }
                     }
 
                     // Store guesses depending on login status
@@ -119,16 +148,17 @@
                             },
                             body: JSON.stringify({
                                 guess: guessValue,
-                                guessNumber: submissionCount
+                                guessNumber: submissionCount,
+                                gameId: gameId
                             }),
                         })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log('Guess sent to the backend:', data);
-                            })
-                            .catch(error => {
-                                console.error('Error saving guess:', error);
-                            });
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Guess sent to the backend:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error saving guess:', error);
+                        });
                     } else {
                         // Store guesses in localStorage if not logged in
                         localStorage.setItem('guesses', JSON.stringify(guesses));
@@ -138,7 +168,26 @@
                     if (submissionCount >= 6 || gameFinished) {
                         document.getElementById('submitGuess').disabled = true;
                         if (!gameFinished) {
-                            alert(`Game over! The correct hex code was #${hex}.`);
+                            // Send result to backend if all guesses used
+                            if (gameStarted && loggedIn === 'true') {
+                                fetch('/end-game', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        gameId: gameId,
+                                        result: 'lose'
+                                    }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('Game ended with loss:', data);
+                                })
+                                .catch(error => {
+                                    console.error('Error sending game result:', error);
+                                });
+                            }
                         }
                     }
 
@@ -158,7 +207,7 @@
                 const newSubmission = document.createElement('div');
                 newSubmission.innerHTML = `<div>
                     ${guess.split('').map((char, index) => {
-                    const generatedChar = hex[index];
+                    const generatedChar = hexCode[index];
                     const charDiff = parseInt(char, 16) - parseInt(generatedChar, 16);
                     let arrows = '';
                     if (charDiff === 0) {
@@ -188,6 +237,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.hex) {
+                        gameStarted = true;
+                        gameId = data.gameId; // Store the game ID returned from the backend
                         showGameAndNavbar(data.hex);
                     } else {
                         console.error('Hex code for today not found');
@@ -228,8 +279,6 @@
             fetchTodaysHexCode();
         }
     </script>
-
-
 </body>
 
 </html>

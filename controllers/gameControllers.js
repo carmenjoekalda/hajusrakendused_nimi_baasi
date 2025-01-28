@@ -64,7 +64,7 @@ function saveGuess(req, res) {
     const { guess, guessNumber } = req.body;
     const username = req.cookies.username;
 
-    pool.execute('SELECT id FROM user WHERE username = ?', [username])
+    pool.execute('SELECT id, total_wins, total_games, current_streak, longest_streak, games_won_in_1, games_won_in_2, games_won_in_3, games_won_in_4, games_won_in_5, games_won_in_6 FROM user WHERE username = ?', [username])
         .then(([user]) => {
             if (user.length > 0) {
                 const userId = user[0].id;
@@ -73,7 +73,68 @@ function saveGuess(req, res) {
 
                 pool.execute(query, [guess, userId])
                     .then(() => {
-                        res.json({ message: 'Guess saved successfully' });
+                        // Update total games if this is the first guess
+                        if (guessNumber === 1) {
+                            const newTotalGames = user[0].total_games + 1;
+                            pool.execute('UPDATE user SET total_games = ? WHERE id = ?', [newTotalGames, userId])
+                                .then(() => {
+                                    console.log('Total games updated.');
+                                })
+                                .catch((error) => {
+                                    console.error('Error updating total games:', error);
+                                });
+                        }
+
+                        // Check if the guess is correct and update the user stats
+                        pool.execute('SELECT hexcode FROM daily_challenges WHERE date = ?', [new Date().toISOString().split('T')[0]])
+                            .then(([challenge]) => {
+                                const hexCode = challenge[0].hexcode;
+
+                                if (guess.toLowerCase() === hexCode.toLowerCase()) {
+                                    // User won, update stats
+                                    let newTotalWins = user[0].total_wins + 1;
+                                    let newCurrentStreak = user[0].current_streak + 1;
+                                    let newLongestStreak = user[0].longest_streak;
+
+                                    if (newCurrentStreak > newLongestStreak) {
+                                        newLongestStreak = newCurrentStreak;
+                                    }
+
+                                    // Update games won in specific attempts
+                                    let gamesWonInX = `games_won_in_${guessNumber}`;
+                                    let newGamesWonInX = user[0][gamesWonInX] + 1;
+
+                                    pool.execute(`UPDATE user SET total_wins = ?, current_streak = ?, longest_streak = ?, ${gamesWonInX} = ? WHERE id = ?`, [newTotalWins, newCurrentStreak, newLongestStreak, newGamesWonInX, userId])
+                                        .then(() => {
+                                            res.json({ message: 'You won! Stats updated.' });
+                                        })
+                                        .catch((error) => {
+                                            console.error('Error updating stats after win:', error);
+                                            res.status(500).json({ error: 'Error updating stats after win' });
+                                        });
+                                } else {
+                                    // Check if this was the last guess
+                                    if (guessNumber >= 6) {
+                                        // User lost, reset streak
+                                        let newCurrentStreak = 0;  // Reset streak
+                                        pool.execute('UPDATE user SET current_streak = ? WHERE id = ?', [newCurrentStreak, userId])
+                                            .then(() => {
+                                                res.json({ message: 'Game over, you lost.' });
+                                            })
+                                            .catch((error) => {
+                                                console.error('Error resetting streak after loss:', error);
+                                                res.status(500).json({ error: 'Error resetting streak after loss' });
+                                            });
+                                    } else {
+                                        // If the user still has guesses left, just return a message
+                                        res.json({ message: 'Guess saved, keep going!' });
+                                    }
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error fetching challenge hex code:', error);
+                                res.status(500).json({ error: 'Error fetching challenge hex code' });
+                            });
                     })
                     .catch((error) => {
                         console.error('Error saving guess:', error);
@@ -126,8 +187,79 @@ function getGuesses(req, res) {
         });
 }
 
+function getUserStats(req, res) {
+    const username = req.cookies.username;
+
+    pool.execute('SELECT * FROM user WHERE username = ?', [username])
+        .then(([user]) => {
+            if (user.length > 0) {
+                const userStats = {
+                    totalWins: user[0].total_wins,
+                    totalGames: user[0].total_games,
+                    currentStreak: user[0].current_streak,
+                    longestStreak: user[0].longest_streak
+                };
+                res.json(userStats);
+            } else {
+                res.status(404).json({ error: 'User not found' });
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching user stats:', error);
+            res.status(500).json({ error: 'Error fetching user stats' });
+        });
+}
+
+function updateUserStats(req, res) {
+    const username = req.cookies.username;
+    const { won } = req.body;
+
+    pool.execute('SELECT * FROM user WHERE username = ?', [username])
+        .then(([user]) => {
+            if (user.length > 0) {
+                const userId = user[0].id;
+                let { total_wins, total_games, current_streak, longest_streak } = user[0];
+
+                total_games += 1;
+                if (won) {
+                    total_wins += 1;
+                    current_streak += 1;
+                    if (current_streak > longest_streak) {
+                        longest_streak = current_streak;
+                    }
+                } else {
+                    current_streak = 0;
+                }
+
+                const query = `UPDATE user SET total_wins = ?, total_games = ?, current_streak = ?, longest_streak = ? WHERE id = ?`;
+                pool.execute(query, [total_wins, total_games, current_streak, longest_streak, userId])
+                    .then(() => {
+                        const updatedStats = {
+                            totalWins: total_wins,
+                            totalGames: total_games,
+                            currentStreak: current_streak,
+                            longestStreak: longest_streak
+                        };
+                        res.json(updatedStats);
+                    })
+                    .catch((error) => {
+                        console.error('Error updating user stats:', error);
+                        res.status(500).json({ error: 'Error updating user stats' });
+                    });
+            } else {
+                res.status(404).json({ error: 'User not found' });
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching user ID:', error);
+            res.status(500).json({ error: 'Error fetching user ID' });
+        });
+}
+
 module.exports = {
     getTodaysHexCode,
     saveGuess,
     getGuesses,
+    getUserStats,
+    updateUserStats
 };
