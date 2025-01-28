@@ -5,6 +5,17 @@ function generateHex() {
     return Math.floor(Math.random()*16777215).toString(16);
 } 
 
+// reset user guesses
+function resetUserGuesses() {
+    pool.execute('UPDATE user_guesses SET guess_1 = NULL, guess_2 = NULL, guess_3 = NULL, guess_4 = NULL, guess_5 = NULL, guess_6 = NULL, guess_date = NULL')
+        .then(() => {
+            console.log('User guesses have been reset.');
+        })
+        .catch((error) => {
+            console.error('Error resetting user guesses:', error);
+        });
+}
+
 // insert the daily hexcode to the database
 function insertTodaysHexCode() {
     const today = new Date().toISOString().split('T')[0];
@@ -12,6 +23,8 @@ function insertTodaysHexCode() {
 
     pool.execute('INSERT INTO daily_challenges (date, hexcode) VALUES (?, ?)', [today, hexCode])
         .then(() => {
+            console.log('New hex code inserted:', hexCode);
+            resetUserGuesses();
         })
         .catch((error) => {
             console.error('Error inserting hex code:', error);
@@ -93,7 +106,7 @@ function getGuesses(req, res) {
                                 guesses[0].guess_4,
                                 guesses[0].guess_5,
                                 guesses[0].guess_6
-                            ].filter(guess => guess !== null); // Filter out null values
+                            ].filter(guess => guess !== null);
                             res.json({ guesses: userGuesses });
                         } else {
                             res.json({ guesses: [] });
