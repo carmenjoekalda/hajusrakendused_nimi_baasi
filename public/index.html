@@ -25,7 +25,7 @@
     <div id="navbar" class="navbar" style="display:none;">
         <ul class="nav-links" id="nav-links">
             <li><a href="#">Tutorial</a></li>
-            <li><a href="#">Stats</a></li>
+            <li><a href="#" id="stats">Stats</a></li>
             <li><a href="#">Settings</a></li>
             <li><a href="#">Profile</a></li>
             <li><a href="#" id="logout">Log Out</a></li>
@@ -313,6 +313,24 @@
         if (getCookie('loggedin') === 'true') {
             fetchTodaysHexCode();
         }
+        // Show stats modal when 'Stats' is clicked
+        document.getElementById('stats').addEventListener('click', function (event) {
+            event.preventDefault();
+            fetch('/get-user-stats')
+                .then(response => response.json())
+                .then(data => {
+                    const stats = `
+                        <p>Total games: ${data.totalGames}</p>
+                        <p>Games won: ${data.totalWins}</p>
+                        <p>Current streak: ${data.currentStreak}</p>
+                        <p>Longest streak: ${data.longestStreak}</p>
+                    `;
+                    showVictoryModal("Your gameplay overview:", stats);
+                })
+                .catch(error => {
+                    console.error('Error fetching user stats:', error);
+                });
+        });
     </script>
 </body>
 
