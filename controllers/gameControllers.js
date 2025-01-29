@@ -64,7 +64,7 @@ function saveGuess(req, res) {
     const { guess, guessNumber } = req.body;
     const username = req.cookies.username;
 
-    pool.execute('SELECT id, total_wins, total_games, current_streak, longest_streak, games_won_in_1, games_won_in_2, games_won_in_3, games_won_in_4, games_won_in_5, games_won_in_6 FROM user WHERE username = ?', [username])
+    pool.execute('SELECT id, total_wins, total_games, current_streak, longest_streak, points, games_won_in_1, games_won_in_2, games_won_in_3, games_won_in_4, games_won_in_5, games_won_in_6 FROM user WHERE username = ?', [username])
         .then(([user]) => {
             if (user.length > 0) {
                 const userId = user[0].id;
@@ -104,7 +104,17 @@ function saveGuess(req, res) {
                                     let gamesWonInX = `games_won_in_${guessNumber}`;
                                     let newGamesWonInX = user[0][gamesWonInX] + 1;
 
-                                    pool.execute(`UPDATE user SET total_wins = ?, current_streak = ?, longest_streak = ?, ${gamesWonInX} = ? WHERE id = ?`, [newTotalWins, newCurrentStreak, newLongestStreak, newGamesWonInX, userId])
+                                    // calculate points
+                                    const basePoints = [100, 80, 60, 40, 20, 10][guessNumber - 1] || 0;
+                                    let streakMultiplier = 1;
+                                    if (newCurrentStreak >= 10) streakMultiplier = 1.3;
+                                    else if (newCurrentStreak >= 5) streakMultiplier = 1.2;
+                                    else if (newCurrentStreak >= 2) streakMultiplier = 1.1;
+
+                                    const pointsEarned = Math.round(basePoints * streakMultiplier);
+                                    const newTotalPoints = user[0].points + pointsEarned;
+
+                                    pool.execute(`UPDATE user SET total_wins = ?, current_streak = ?, longest_streak = ?, points = ?, ${gamesWonInX} = ? WHERE id = ?`, [newTotalWins, newCurrentStreak, newLongestStreak, newTotalPoints, newGamesWonInX, userId])
                                         .then(() => {
                                             res.json({ message: 'You won! Stats updated.' });
                                         })
@@ -197,7 +207,8 @@ function getUserStats(req, res) {
                     totalWins: user[0].total_wins,
                     totalGames: user[0].total_games,
                     currentStreak: user[0].current_streak,
-                    longestStreak: user[0].longest_streak
+                    longestStreak: user[0].longest_streak,
+                    points: user[0].points
                 };
                 res.json(userStats);
             } else {
