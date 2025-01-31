@@ -2,8 +2,8 @@ const pool = require('../db');
 const cron = require('node-cron');
 
 function generateHex() {
-    return Math.floor(Math.random()*16777215).toString(16);
-} 
+    return Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+}
 
 // reset user guesses
 function resetUserGuesses() {
@@ -267,10 +267,30 @@ function updateUserStats(req, res) {
         });
 }
 
+function getTop5(req, res) {
+    pool.execute('SELECT username, points FROM user ORDER BY points DESC LIMIT 5')
+        .then(([result]) => {
+            if (result.length > 0) {
+                const top5Players = result.map(player => ({
+                    username: player.username,
+                    points: player.points
+                }));
+                res.json(top5Players);
+            } else {
+                res.status(404).json({ error: 'No players found' });
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching top 5 players:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        });
+} 
+
 module.exports = {
     getTodaysHexCode,
     saveGuess,
     getGuesses,
     getUserStats,
-    updateUserStats
+    updateUserStats,
+    getTop5,
 };

@@ -11,5 +11,6 @@ router.post('/save-guess', gameController.saveGuess);
 router.get('/get-guesses', gameController.getGuesses);
 router.get('/get-user-stats', gameController.getUserStats);
 router.post('/update-user-stats', gameController.updateUserStats);
+router.get('/top5-players', gameController.getTop5)
 
 module.exports = router;
