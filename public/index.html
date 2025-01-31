@@ -349,6 +349,11 @@
                     console.error('Error fetching user stats:', error);
                 });
         });
+
+        // close modal
+        closeModal.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
     </script>
 </body>
 
